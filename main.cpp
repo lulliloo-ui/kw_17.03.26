@@ -5,7 +5,7 @@
 
 bool testEmptyVecror()
 {
-  Vector v;
+  topit::Vector< int > v;
   return v.isEmpty();
 }
 int main()
