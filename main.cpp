@@ -8,9 +8,10 @@ bool testEmptyVecror()
   topit::Vector< int > v;
   return v.isEmpty();
 }
+
 int main()
 {
-  using test_t = std::pair< const char*, bool(*)() >;
+  using test_t = std::pair< const char *, bool(*)() >;
   test_t tests[] = {
     { "Empty vector", testEmptyVecror}
   };
@@ -22,5 +23,5 @@ int main()
     std::cout << tests[i].first << ":" << res << "\n";
     pass = pass && res;
   }
-  std::cout << "RESULT: " <<pass << "\n";
+  std::cout << "RESULT: " << pass << "\n";
 }
