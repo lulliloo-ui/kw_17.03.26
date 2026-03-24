@@ -3,8 +3,9 @@
 #include <iomanip>
 
 
-bool testEmptyVecror()
+bool testEmptyVecror()  // можно добавить std::map
 {
+  // std::cout << __func__ << "\n";
   topit::Vector< int > v;
   return v.isEmpty();
 }
@@ -24,4 +25,6 @@ int main()
     pass = pass && res;
   }
   std::cout << "RESULT: " << pass << "\n";
+  //подсчет пройденный непройденных
+  //выводить только не прошедшие тесты
 }
