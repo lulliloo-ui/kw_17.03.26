@@ -128,6 +128,15 @@ void topit::Vector< T >::popBack()
 }
 
 template< class T >
+topit::Vector< T >::Vector(const Vector< T >& rhs)
+{}
 
+template< class T >
+void topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
+{
+  bool isEqual = lhs.getSize() == rhs.getSize();
+  for (size_ i = 0; (i < lhs.getSize()) && (isEqual = isEqual && lhs[i] == rhs[i]); ++i)
+  return isEqual;
+}
 
 #endif
