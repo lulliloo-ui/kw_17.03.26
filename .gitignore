@@ -1,4 +1,5 @@
 Makefile
 main
-main.o
-main.d
+*.swp
+*.o
+*.d
