@@ -68,6 +68,24 @@ bool testCopyConstructor()
   return v == yav;
 }
 
+bool testCopyConstructorForEmpty() 
+{
+  topit::Vector< int > v;
+  topit::Vector< int > yav = v;
+  return v == yav;
+}
+
+bool testCopyConstructorForNonEmpty() 
+{
+  topit::Vector< int > v;
+  topit::Vector< int > yav = v;
+  try {
+  return yav.getSize() == v.getSize() && yav.at(0) == v.at(0);
+  } catch (...) {
+    return false;
+  }
+}
+
 int main()
 {
   using test_t = std::pair< const char *, bool(*)() >;
@@ -76,7 +94,10 @@ int main()
     { "Inbound access", testElementInboundAccess},
     { "Out of bound access", testElementOutOfBoundAccess},
     { "Inbound const access", testElementInboundConstAccess},
-    { "Out of bound const access", testElementOutOfBoundConstAccess}
+    { "Out of bound const access", testElementOutOfBoundConstAccess},
+    { "Copy empty vector", testCopyConstructor},
+    { "Copy empty vector", testCopyConstructorForEmpty},
+    { "Copy non-empty vector", testCopyConstructorForNonEmpty}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;
