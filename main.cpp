@@ -61,6 +61,13 @@ bool testElementOutOfBoundConstAccess()
   }
 }
 
+bool testCopyConstructor()
+{
+  topit::Vector< int > v;
+  topit::Vector< int > yav = v;
+  return v == yav;
+}
+
 int main()
 {
   using test_t = std::pair< const char *, bool(*)() >;

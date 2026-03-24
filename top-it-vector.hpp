@@ -30,6 +30,9 @@ namespace topit {
     T * data_;
     size_t size_, capacity_;
   };
+  template< class T >
+  void operator==(const Vector< T > & lhs, const Vector< T > & rhs)
+  {}
 }
 
 template< class T >
@@ -123,5 +126,8 @@ void topit::Vector< T >::popBack()
     size_--;
   }
 }
+
+template< class T >
+
 
 #endif
