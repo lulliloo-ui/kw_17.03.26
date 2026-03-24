@@ -86,7 +86,6 @@ template< class T >
 void topit::Vector< T >::popBack()
 {
   if (size_) {
-    data_[size_ - 1].~T();
     size_--;
   }
 }
