@@ -7,28 +7,31 @@ namespace topit {
   template< class T >
   struct Vector {
     Vector();
-    Vector(const Vector&);
-    Vector(Vector &&);
+    Vector(const Vector&);  //конструктор копирования
+    Vector(Vector &&);  //конструктор перемещения
     ~Vector();
+    Vector& operator=(const Vector&);
+    Vector& operator=(Vector&&);
+
+    bool isEmpty() const noexcept;  //дз + тест
+    size_t getSize() const noexcept;  //дз + тест
+    size_t getCapacity() const noexcept;  //дз + тест
+
+    void pushBack(const T& v);  //дз + тест
+    void popBack();  //дз + тест
+
     Vector(const Vector< T > &);
     Vector(Vecctorr< T > &&);
     expliset Vector(size_t size);
 
     void Vector< T >::swap( Vector< T > & rhs) noexcept;
-    Vector& operator=(const Vector&);
-    Vector& operator=(Vector&&);
 
-    bool isEmpty() const noexcept;
-    size_t getSize() const noexcept;
-    size_t getCapacity() const noexcept;
 
     T & operator[](size_t id) noexcept;  // noexcept значит ничего внутри не проверяется
     const T & operator[](size_t id) const noexcept;
     T & at(size_t id);
     const T & at(size_t id) const;
 
-    void pushBack(const T& v);
-    void popBack();
     void insert(size_t i, const T& v);
     void erase(size_t i);
 
@@ -79,35 +82,6 @@ size_t topit::Vector< T >::getCapacity() const noexcept
 }
 
 template< class T >
-T & topit::Vector< T >::operator[](size_t id) noexcept
-{
-  const Vector< T > * cthis = this;
-  return const_cast< T& >((*cthis)[id]);  //игнор константности
-}
-
-template< class T >
-const T & topit::Vector< T >::operator[](size_t id) const noexcept
-{
-  return data_[id];
-}
-
-template< class T >
-T & topit::Vector< T >::at(size_t id)
-{
-  const Vector< T > * cthis = this;
-  return const_cast< T& >(cthis->at(id));
-}
-
-template< class T >
-const T & topit::Vector< T >::at(size_t id) const
-{
-  if (id < getSize()) {
-    return (*this)[id];
-  }
-  throw std::out_of_range("bad id");
-}
-
-template< class T >
 void topit::Vector< T >::pushBack(const T & v)
 {
   if (size_ < capacity_) {
@@ -138,6 +112,36 @@ void topit::Vector< T >::popBack()
     size_--;
   }
 }
+
+template< class T >
+T & topit::Vector< T >::operator[](size_t id) noexcept
+{
+  const Vector< T > * cthis = this;
+  return const_cast< T& >((*cthis)[id]);  //игнор константности
+}
+
+template< class T >
+const T & topit::Vector< T >::operator[](size_t id) const noexcept
+{
+  return data_[id];
+}
+
+template< class T >
+T & topit::Vector< T >::at(size_t id)
+{
+  const Vector< T > * cthis = this;
+  return const_cast< T& >(cthis->at(id));
+}
+
+template< class T >
+const T & topit::Vector< T >::at(size_t id) const
+{
+  if (id < getSize()) {
+    return (*this)[id];
+  }
+  throw std::out_of_range("bad id");
+}
+
 
 template< class T >
 topit::Vector< T >::Vector(const Vector< T >& rhs) :  //строгая гарантия

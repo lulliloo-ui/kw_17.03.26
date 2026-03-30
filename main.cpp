@@ -10,6 +10,49 @@ bool testEmptyVecror()  // можно добавить std::map
   return v.isEmpty();
 }
 
+bool testGetSize()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(3);
+  return v.getSize() == 3;
+}
+
+bool testGetCapacityEmpty()
+{
+  topit::Vector< int > v;
+  return v.getCapacity() == 0;
+}
+
+bool testGetCapacityNoOneElement()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  return v.getCapacity() > 0;
+}
+
+bool testPushBack()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(3);
+  v.pushBack(4);
+  return !v.isEmpty() && v.getSize() == 4;
+}
+
+bool testPopBack()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(3);
+  v.popBack();
+  return v.getSize() == 2 && !v.isEmpty();
+}
+
 bool testElementInboundAccess()
 {
   topit::Vector< int > v;
@@ -97,6 +140,11 @@ int main()
   using test_t = std::pair< const char *, bool(*)() >;
   test_t tests[] = {
     { "Empty vector", testEmptyVecror},
+    { "Get size", testGetSize },
+    { "Get campacity with empty vector", testGetCapacityEmpty},
+    { "Get campacity with not one element", testGetCapacityNoOneElement},
+    { "Push back elements", testPushBack},
+    { "Pop back one element", testPopBack},
     { "Inbound access", testElementInboundAccess},
     { "Out of bound access", testElementOutOfBoundAccess},
     { "Inbound const access", testElementInboundConstAccess},
