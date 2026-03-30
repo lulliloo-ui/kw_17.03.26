@@ -86,6 +86,12 @@ bool testCopyConstructorForNonEmpty()
   }
 }
 
+
+bool testInitialaizerList() {
+  topit::Vector< T > v = {1, 2};
+  return v.getSize() = 2 && v[0] == 1 && v[1] == 2;
+}
+
 int main()
 {
   using test_t = std::pair< const char *, bool(*)() >;
@@ -97,7 +103,8 @@ int main()
     { "Out of bound const access", testElementOutOfBoundConstAccess},
     { "Copy empty vector", testCopyConstructor},
     { "Copy empty vector", testCopyConstructorForEmpty},
-    { "Copy non-empty vector", testCopyConstructorForNonEmpty}
+    { "Copy non-empty vector", testCopyConstructorForNonEmpty},
+    { "Non-empty vector for non-empty initializer list", testInitialaizerList}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;
