@@ -20,13 +20,6 @@ namespace topit {
     void pushBack(const T& v);  //дз + тест
     void popBack();  //дз + тест
 
-    Vector(const Vector< T > &);
-    Vector(Vecctorr< T > &&);
-    expliset Vector(size_t size);
-
-    void Vector< T >::swap( Vector< T > & rhs) noexcept;
-
-
     T & operator[](size_t id) noexcept;  // noexcept значит ничего внутри не проверяется
     const T & operator[](size_t id) const noexcept;
     T & at(size_t id);
@@ -35,10 +28,14 @@ namespace topit {
     void insert(size_t i, const T& v);
     void erase(size_t i);
 
+    explicit Vector(size_t size);
+
+    void swap( Vector< T > & rhs) noexcept;
+
     explicit Vector< T >::Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
-    void researve(size_t required);
+    void reserve(size_t required);
     void shrinkToFit();
-    void pushBackCount(size_t k const T& v);
+    void pushBackCount(size_t k, const T& v);
     template< class IT >
 
   private:
@@ -46,8 +43,7 @@ namespace topit {
     size_t size_, capacity_;
   };
   template< class T >
-  void operator==(const Vector< T > & lhs, const Vector< T > & rhs)
-  {}
+  bool operator==(const Vector< T > & lhs, const Vector< T > & rhs);
 }
 
 template< class T >
@@ -129,19 +125,28 @@ const T & topit::Vector< T >::operator[](size_t id) const noexcept
 template< class T >
 T & topit::Vector< T >::at(size_t id)
 {
-  const Vector< T > * cthis = this;
-  return const_cast< T& >(cthis->at(id));
+  const Vector< T >* cthis = this;
+  //return const_cast< T& >(static_cast< const topit::Vector<T>* >(this)->at(id));
+  return const_cast< T& >(cthis -> at(id));  //избегаем дублирования с неconst at()
 }
 
 template< class T >
 const T & topit::Vector< T >::at(size_t id) const
 {
-  if (id < getSize()) {
-    return (*this)[id];
+  if( id < getSize())
+  {
+    return (*cthis)[id];
   }
   throw std::out_of_range("bad id");
 }
 
+template< class T >
+bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
+{
+  bool isEqual = lhs.getSize() == rhs.getSize();
+  for (size_t i = 0; (i < lhs.getSize()) && (isEqual = isEqual && lhs[i] == rhs[i]); ++i);
+  return isEqual;
+}
 
 template< class T >
 topit::Vector< T >::Vector(const Vector< T >& rhs) :  //строгая гарантия
@@ -157,14 +162,6 @@ topit::Vector< T >::Vector(const Vector< T >& rhs) :  //строгая гара�
       throw;
     }
   }
-}
-
-template< class T >
-bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
-{
-  bool isEqual = lhs.getSize() == rhs.getSize();
-  for (size_ i = 0; (i < lhs.getSize()) && (isEqual = isEqual && lhs[i] == rhs[i]); ++i)
-  return isEqual;
 }
 
 template< class T >

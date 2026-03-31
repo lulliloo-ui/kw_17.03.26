@@ -5,7 +5,7 @@
 
 bool testEmptyVecror()  // можно добавить std::map
 {
-  // std::cout << __func__ << "\n";
+  // std::cout << __func__ << "\n";  выводит название исполняемой функции
   topit::Vector< int > v;
   return v.isEmpty();
 }
