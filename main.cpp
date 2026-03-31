@@ -123,6 +123,43 @@ bool testCopyConstructorForNonEmpty()
   }
 }
 
+bool testDisplacementConstructorEmpty()
+{
+  topit::Vector< int > v;
+  topit::Vector< int > nv = std::move(v);
+  return v.getSize() ==0 && nv.getSize() == 0 &&
+    v.isEmpty() && nv.isEmpty() &&
+    v.getCapacity() ==0 && nv.getCapacity() == 0;
+}
+
+bool testDisplacementConstructorNonEmpty()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  int * add = std::addressof(v[0]);
+  size_t cap = v.getCapacity();
+  topit::Vector< int > nv = std::move(v);
+  return (v.getSize() == 0) && (v.getCapacity() == 0) &&
+    v.isEmpty() && nv.getCapacity() == cap &&
+    add == std::addressof(nv[0]) && (nv.getSize() == 2);
+}
+
+bool testInitializedConstructorEmpty()
+{
+  topit::Vector< int > v(0, 1);
+  return v.getSize() == 0 && v.getCapacity() == 0 && v.isEmpty();
+}
+
+bool testInitializedConstructor()
+{
+  topit::Vector< int > v(4, 1);
+  bool init = true;
+  for(size_t i = 0; i < v.getSize(); ++i) {
+    init = init && (v[i] == 1);
+  }
+  return v.getSize() == 4 && v.getCapacity() == 4 && init;
+}
 
 bool testInitialaizerList() {
   topit::Vector< T > v = {1, 2};
@@ -145,6 +182,10 @@ int main()
     { "Out of bound const access", testElementOutOfBoundConstAccess},
     { "Copy empty vector", testCopyConstructorForEmpty},
     { "Copy non-empty vector", testCopyConstructorForNonEmpty},
+    { "Displacement constructo with empty vector", testDisplacementConstructorEmpty},
+    { "Displacement constructo with non-empty vector", testDisplacementConstructorNonEmpty},
+    { "Initialized constructor with empty vector", testDisplacementConstructorNonEmpty},
+    { "Initialized constructor non-empty", testInitializedConstructor},
     { "Non-empty vector for non-empty initializer list", testInitialaizerList}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);

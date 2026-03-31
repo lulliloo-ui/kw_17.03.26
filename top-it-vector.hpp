@@ -9,7 +9,6 @@ namespace topit {
     Vector();
     Vector(const Vector&);  //конструктор копирования
     Vector(Vector &&) noexcept;  //конструктор перемещения
-    explicit Vector(size_t size);
     Vector(size_t size, const T& init);
     ~Vector();
 
@@ -44,6 +43,7 @@ namespace topit {
   private:
     T * data_;
     size_t size_, capacity_;
+    explicit Vector(size_t size);
   };
 
   template< class T >
