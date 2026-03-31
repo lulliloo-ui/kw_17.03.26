@@ -104,13 +104,6 @@ bool testElementOutOfBoundConstAccess()
   }
 }
 
-bool testCopyConstructor()
-{
-  topit::Vector< int > v;
-  topit::Vector< int > yav = v;
-  return v == yav;
-}
-
 bool testCopyConstructorForEmpty() 
 {
   topit::Vector< int > v;
@@ -121,9 +114,10 @@ bool testCopyConstructorForEmpty()
 bool testCopyConstructorForNonEmpty() 
 {
   topit::Vector< int > v;
+  v.pushBack(1);
   topit::Vector< int > yav = v;
   try {
-  return yav.getSize() == v.getSize() && yav.at(0) == v.at(0);
+    return yav.getSize() == v.getSize() && yav.at(0) == v.at(0);
   } catch (...) {
     return false;
   }
@@ -149,7 +143,6 @@ int main()
     { "Out of bound access", testElementOutOfBoundAccess},
     { "Inbound const access", testElementInboundConstAccess},
     { "Out of bound const access", testElementOutOfBoundConstAccess},
-    { "Copy empty vector", testCopyConstructor},
     { "Copy empty vector", testCopyConstructorForEmpty},
     { "Copy non-empty vector", testCopyConstructorForNonEmpty},
     { "Non-empty vector for non-empty initializer list", testInitialaizerList}
