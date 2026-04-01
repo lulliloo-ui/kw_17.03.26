@@ -161,6 +161,179 @@ bool testInitializedConstructor()
   return v.getSize() == 4 && v.getCapacity() == 4 && init;
 }
 
+bool testInsertOneElementOutOfRange()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(3);
+  try {
+    v.insert(10, 4);
+    return false;
+  } catch (const std::out_of_range &) {
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testSingleElementInsertion()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(4);
+  try {
+    v.insert(2, 3);
+    return v.getSize() == 4 && v[0] == 1 && v[1] == 2 && v[2] == 3 &&
+      v[3] == 4 && v.getSize() == 4;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testInsertingMultipleElementsOutOfRange()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  topit::Vector< int > nv;
+  nv.pushBack(3);
+  nv.pushBack(4);
+  try {
+    v.insert(10, nv, 0, 2);
+    return false;
+  } catch (const std::out_of_range &) {
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testInsertingMultipleElementsStartMoreEnd()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  topit::Vector< int > nv;
+  nv.pushBack(3);
+  nv.pushBack(4);
+  try {
+    v.insert(1, nv, 2, 0);
+    return false;
+  } catch (const std::invalid_argument &) {
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testInsertingMultipleElementsStartEquallyEnd()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  topit::Vector< int > nv;
+  nv.pushBack(3);
+  nv.pushBack(4);
+  try {
+    v.insert(1, nv, 0, 0);
+    return v.getSize() == 2 && v[0] == 1 && v[1] == 2 &&
+      nv.getSize() == 2 && nv[0] == 1 && nv[1] == 2;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testInsertingMultipleElements()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(4);
+  topit::Vector< int > nv;
+  nv.pushBack(2);
+  nv.pushBack(3);
+  try {
+    v.insert(1, nv, 0, 2);
+    return v.getSize() == 4 && v[0] == 1 && v[1] == 2 &&
+      v[2] == 3 && v[3] == 4 &&
+      nv.getSize() == 2 && nv[0] == 1 && nv[1] == 2;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testEraseIndexOutOfRangeOneElement()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  try {
+    v.erase(5);
+    return false;
+  } catch (const std::out_of_range &) {
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testEraseOneElement()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  try {
+    v.erase(0);
+    return v.getSize() == 1 && v[0] == 2;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testEraseMultipleElementsStartMoreEnd()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  try {
+    v.erase(1, 0);
+    return false;
+  } catch (const std::invalid_argument &) {
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testEraseMultipleElementsStartEquallyEnd()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  try {
+    v.erase(0, 0);
+    return v.getSize() == 2 && v[0] == 1 && v[1] == 2;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool testEraseMultipleElement()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(0);
+  v.pushBack(0);
+  v.pushBack(2);
+  try {
+    v.erase(1, 3);
+    return v.getSize() == 2 && v[0] == 1 && v[1] == 2;
+  } catch (...) {
+    return false;
+  }
+}
+
 bool testInitialaizerList() {
   topit::Vector< T > v = {1, 2};
   return v.getSize() = 2 && v[0] == 1 && v[1] == 2;
@@ -186,6 +359,17 @@ int main()
     { "Displacement constructo with non-empty vector", testDisplacementConstructorNonEmpty},
     { "Initialized constructor with empty vector", testDisplacementConstructorNonEmpty},
     { "Initialized constructor non-empty", testInitializedConstructor},
+    { "Insert one element out of range", testInsertOneElementOutOfRange},
+    { "Inserting a single element", testSingleElementInsertion},
+    { "Inserting multiple elements out of range", testInsertingMultipleElementsOutOfRange},
+    { "Inserting multiple elements start more end", testInsertingMultipleElementsStartMoreEnd},
+    { "Inserting multiple elements start equally end", testInsertingMultipleElementsStartEquallyEnd},
+    { "Inserting multiple elements", testInsertingMultipleElements},
+    { "Erase index out of rangewith one element", testEraseIndexOutOfRangeOneElement},
+    { "Erase one element", testEraseOneElement},
+    { "Erase multiple elements start more end", testEraseMultipleElementsStartMoreEnd},
+    { "Erase multiple elements start equally end", testEraseMultipleElementsStartEquallyEnd},
+    { "Erase multiple element", testEraseMultipleElement},
     { "Non-empty vector for non-empty initializer list", testInitialaizerList}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
