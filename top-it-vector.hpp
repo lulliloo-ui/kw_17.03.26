@@ -30,9 +30,9 @@ namespace topit {
     void swap( Vector< T > & rhs) noexcept;
 
     void insert(size_t i, const T& v);
-    void erase(size_t i);
     void insert(size_t i, const Vector< T >& rhs, size_t start, size_t end);
-    void erase(Size_t start, size_t end);
+    void erase(size_t i);
+    void erase(size_t start, size_t end);
 
     explicit Vector< T >::Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
     void reserve(size_t required);
@@ -220,11 +220,145 @@ void topit::Vector< T >::swap( Vector< T > & rhs) noexcept
 }
 
 template< class T >
-bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
+void topit::Vector< T >::insert(size_t i, const T& v)
 {
-  bool isEqual = lhs.getSize() == rhs.getSize();
-  for (size_t i = 0; (i < lhs.getSize()) && (isEqual = isEqual && lhs[i] == rhs[i]); ++i);
-  return isEqual;
+  if (i > size_) {
+    throw std::out_of_range("insert index out of range");
+  }
+  T * new_data = nullptr;
+  size_t new_cap = 0;
+  if (size_ < capacity_) {
+    new_cap = getCapacity();
+    new_data = new T[new_cap];
+  } else {
+    new_cap = getCapacity() * 2 + 1;
+    new_data = new T[new_cap];
+  }
+  size_t j = 0;
+  try {
+    while (j < i) {
+      new_data[j] = data_[j];
+      j++;
+    }
+    new_data[j++] = v;
+    while (j < getSize()) {
+      new_data[j] = data_[j - 1];
+      j++;
+    }
+  } catch (...) {
+    delete []new_data;
+    throw;
+  }
+  delete[] data_;
+  data_ = new_data;
+  capacity_ = new_cap;
+  size_++;
+}
+
+template< class T >
+void topit::Vector< T >::insert(size_t i, const Vector< T >& rhs, size_t start, size_t end)
+{
+  size_t delta = (end - start);
+  if (delta == 0) return;
+
+  if (i > size_) {
+    throw std::out_of_range("insert index out of range");
+  }
+  if (end < start) {
+    throw std::invalid_argument("start > end");
+  }
+  if (end > rhs.size_) {
+    throw std::out_of_range("rhs end out of range");
+  }
+
+  T * new_data = nullptr;
+  size_t new_cap = 0;
+  if ((size_ + delta) <= capacity_) {
+    new_cap = getCapacity();
+    new_data = new T[new_cap];
+  } else {
+    new_cap = size_ + delta;
+    new_data = new T[new_cap];
+  }
+  size_t j = 0;
+  try {
+    while (j < i) {
+      new_data[j] = data_[j];
+      j++;
+    }
+    for (size_t k = start; k < end; ++k) {
+      new_data[j] = rhs[k];
+      j++;
+    }
+    for (size_t k = i; k < size_; ++k) {
+      new_data[j] = data_[k];
+      j++;
+    }
+  } catch (...) {
+    delete []new_data;
+    throw;
+  }
+  delete[] data_;
+  data_ = new_data;
+  capacity_ = new_cap;
+  size_ += delta;
+}
+
+template< class T >
+void topit::Vector< T >::erase(size_t i)
+{
+  if (i >= size_) {
+    throw std::out_of_range("erase index out of range");
+  }
+  T * new_data = new T[capacity_];
+  size_t j = 0;
+  try {
+    while (j < i) {
+      new_data[j] = data_[j];
+      j++;
+    }
+    while (j < size_ - 1) {
+      new_data[j] = data_[j + 1];
+      j++;
+    }
+  } catch (...) {
+    delete []new_data;
+    throw;
+  }
+  delete[] data_;
+  data_ = new_data;
+  size_--;
+}
+
+template< class T >
+void topit::Vector< T >::erase(size_t start, size_t end)
+{
+  size_t delta = (end - start);
+  if (delta == 0) return;
+  if (end < start) {
+    throw std::invalid_argument("start > end");
+  }
+  if (end > size_) {
+    throw std::out_of_range("end out of range");
+  }
+  T * new_data = new T[capacity_];
+  size_t j = 0;
+  try {
+    while (j < start) {
+      new_data[j] = data_[j];
+      j++;
+    }
+    while (j < size_ - delta) {
+      new_data[j] = data_[j + delta];
+      j++;
+    }
+  } catch (...) {
+    delete []new_data;
+    throw;
+  }
+  delete[] data_;
+  data_ = new_data;
+  size_ -= delta;
 }
 
 
@@ -267,6 +401,14 @@ void topit::Vector< T >::pushBackRange(IT b, size_t c)
   //
   //
   //
+}
+
+template< class T >
+bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
+{
+  bool isEqual = lhs.getSize() == rhs.getSize();
+  for (size_t i = 0; (i < lhs.getSize()) && (isEqual = isEqual && lhs[i] == rhs[i]); ++i);
+  return isEqual;
 }
 
 
