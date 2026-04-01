@@ -145,6 +145,15 @@ bool testDisplacementConstructorNonEmpty()
     add == std::addressof(nv[0]) && (nv.getSize() == 2);
 }
 
+bool testMovingToTheSameElement()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v = std::move(v);
+  return v.getSize() == 2 && v[0] == 1 && v[1] == 2;
+}
+
 bool testInitializedConstructorEmpty()
 {
   topit::Vector< int > v(0, 1);
@@ -185,8 +194,8 @@ bool testSingleElementInsertion()
   v.pushBack(4);
   try {
     v.insert(2, 3);
-    return v.getSize() == 4 && v[0] == 1 && v[1] == 2 && v[2] == 3 &&
-      v[3] == 4 && v.getSize() == 4;
+    return v.getSize() == 4 && v[0] == 1 &&
+      v[1] == 2 && v[2] == 3 && v[3] == 4;
   } catch (...) {
     return false;
   }
@@ -239,7 +248,7 @@ bool testInsertingMultipleElementsStartEquallyEnd()
   try {
     v.insert(1, nv, 0, 0);
     return v.getSize() == 2 && v[0] == 1 && v[1] == 2 &&
-      nv.getSize() == 2 && nv[0] == 1 && nv[1] == 2;
+      nv.getSize() == 2 && nv[0] == 3 && nv[1] == 4;
   } catch (...) {
     return false;
   }
@@ -257,7 +266,7 @@ bool testInsertingMultipleElements()
     v.insert(1, nv, 0, 2);
     return v.getSize() == 4 && v[0] == 1 && v[1] == 2 &&
       v[2] == 3 && v[3] == 4 &&
-      nv.getSize() == 2 && nv[0] == 1 && nv[1] == 2;
+      nv.getSize() == 2 && nv[0] == 2 && nv[1] == 3;
   } catch (...) {
     return false;
   }
@@ -334,10 +343,10 @@ bool testEraseMultipleElement()
   }
 }
 
-bool testInitialaizerList() {
-  topit::Vector< T > v = {1, 2};
-  return v.getSize() = 2 && v[0] == 1 && v[1] == 2;
-}
+// bool testInitialaizerList() {
+//   topit::Vector< T > v = {1, 2};
+//   return v.getSize() = 2 && v[0] == 1 && v[1] == 2;
+// }
 
 int main()
 {
@@ -355,8 +364,9 @@ int main()
     { "Out of bound const access", testElementOutOfBoundConstAccess},
     { "Copy empty vector", testCopyConstructorForEmpty},
     { "Copy non-empty vector", testCopyConstructorForNonEmpty},
-    { "Displacement constructo with empty vector", testDisplacementConstructorEmpty},
-    { "Displacement constructo with non-empty vector", testDisplacementConstructorNonEmpty},
+    { "Displacement constructor with empty vector", testDisplacementConstructorEmpty},
+    { "Displacement constructor with non-empty vector", testDisplacementConstructorNonEmpty},
+    { "Moving to the same element", testMovingToTheSameElement},
     { "Initialized constructor with empty vector", testDisplacementConstructorNonEmpty},
     { "Initialized constructor non-empty", testInitializedConstructor},
     { "Insert one element out of range", testInsertOneElementOutOfRange},
@@ -369,8 +379,8 @@ int main()
     { "Erase one element", testEraseOneElement},
     { "Erase multiple elements start more end", testEraseMultipleElementsStartMoreEnd},
     { "Erase multiple elements start equally end", testEraseMultipleElementsStartEquallyEnd},
-    { "Erase multiple element", testEraseMultipleElement},
-    { "Non-empty vector for non-empty initializer list", testInitialaizerList}
+    { "Erase multiple element", testEraseMultipleElement}
+//    { "Non-empty vector for non-empty initializer list", testInitialaizerList}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;

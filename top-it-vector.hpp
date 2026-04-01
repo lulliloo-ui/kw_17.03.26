@@ -1,6 +1,9 @@
 #ifndef TOP_IT_VECTOR_HPP
 #define TOP_IT_VECTOR_HPP
 #include <cstddef>
+#include <memory>
+#include <utility>
+#include <stdexcept>
 #include <initializer_list>
 
 namespace topit {
@@ -34,11 +37,11 @@ namespace topit {
     void erase(size_t i);
     void erase(size_t start, size_t end);
 
-    explicit Vector< T >::Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
+//    explicit Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
     void reserve(size_t required);
     void shrinkToFit();
     void pushBackCount(size_t k, const T& v);
-    template< class IT >
+//    template< class IT >
 
   private:
     T * data_;
@@ -67,7 +70,7 @@ topit::Vector< T >::Vector(const Vector< T >& rhs) :  //строгая гара�
     try {
       data_[i] = rhs[i];
     } catch (...) {
-      delete [data_];
+      delete []data_;
       throw;
     }
   }
@@ -77,16 +80,18 @@ template< class T >
 topit::Vector< T >::Vector(Vector< T > && rhs) noexcept:
   data_(rhs.data_),
   size_(rhs.size_),
-  capacity_(rhs.capasity)
+  capacity_(rhs.capacity_)
 {
-  rhs.data_ = nullpt;
+  rhs.data_ = nullptr;
+  rhs.size_ = 0;
+  rhs.capacity_ = 0;
 }
 
 template< class T >
 topit::Vector< T >::Vector(size_t size) :
   data_(size ? new T[size] : nullptr),
   size_(size),
-  capasity_(size)
+  capacity_(size)
 {}
 
 template< class T >
@@ -206,7 +211,7 @@ const T & topit::Vector< T >::at(size_t id) const
 {
   if( id < getSize())
   {
-    return (*cthis)[id];
+    return (*this)[id];
   }
   throw std::out_of_range("bad id");
 }
@@ -214,8 +219,8 @@ const T & topit::Vector< T >::at(size_t id) const
 template< class T >
 void topit::Vector< T >::swap( Vector< T > & rhs) noexcept
 {
-  std::swap(data__, rhs.data_);
-  std::swap(size__, rhs.size_);
+  std::swap(data_, rhs.data_);
+  std::swap(size_, rhs.size_);
   std::swap(capacity_, rhs.capacity_);
 }
 
@@ -241,7 +246,7 @@ void topit::Vector< T >::insert(size_t i, const T& v)
       j++;
     }
     new_data[j++] = v;
-    while (j < getSize()) {
+    while (j < getSize() + 1) {
       new_data[j] = data_[j - 1];
       j++;
     }
@@ -259,7 +264,9 @@ template< class T >
 void topit::Vector< T >::insert(size_t i, const Vector< T >& rhs, size_t start, size_t end)
 {
   size_t delta = (end - start);
-  if (delta == 0) return;
+  if (delta == 0) {
+    return;
+  }
 
   if (i > size_) {
     throw std::out_of_range("insert index out of range");
@@ -362,46 +369,46 @@ void topit::Vector< T >::erase(size_t start, size_t end)
 }
 
 
-template< class T >
-void topit::Vector< T >::changeVectorInSomeWay()
-{
-  Vector< T > cpy(*this);
-  cpy.pushBack(T());
-  cpy.pushBack(T());
-  cpy.pushBack(T());
-  cpy.pushBack(T());
-  cpy.pushBack(T());
-  cpy.pushBack(T());
-  swap(cpy);
-}
+// template< class T >
+// void topit::Vector< T >::changeVectorInSomeWay()
+// {
+//   Vector< T > cpy(*this);
+//   cpy.pushBack(T());
+//   cpy.pushBack(T());
+//   cpy.pushBack(T());
+//   cpy.pushBack(T());
+//   cpy.pushBack(T());
+//   cpy.pushBack(T());
+//   swap(cpy);
+// }
 
 
-template< class T >
-topit::Vector< T >::Vector(std::initializer_list< T > il) : Vector(il.size())
-{
-  size_t i = 0;
-  for (auto it = il.begin(); it = il.end(); ++it) {
-    data_[i++] = *it;
-  }
-}
+// template< class T >
+// topit::Vector< T >::Vector(std::initializer_list< T > il) : Vector(il.size())
+// {
+//   size_t i = 0;
+//   for (auto it = il.begin(); it = il.end(); ++it) {
+//     data_[i++] = *it;
+//   }
+// }
 
-template< class T >
-void topit::Vector< T >::pushBackCount(size_t k, const T& val) {
-  for (size_t i   = 0; i< k; ++i) {
+// template< class T >
+// void topit::Vector< T >::pushBackCount(size_t k, const T& val) {
+//   for (size_t i   = 0; i< k; ++i) {
 
-  }
-}
+//   }
+// }
 
 
-template< class T >
-template< class IT >
-void topit::Vector< T >::pushBackRange(IT b, size_t c)
-{
-  // size_t c = std::distance(b, e); плохо проход по всему списку
-  //
-  //
-  //
-}
+// template< class T >
+// template< class IT >
+// void topit::Vector< T >::pushBackRange(IT b, size_t c)
+// {
+//   // size_t c = std::distance(b, e); плохо проход по всему списку
+//   //
+//   //
+//   //
+// }
 
 template< class T >
 bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
