@@ -35,10 +35,14 @@ namespace topit {
 
     void swap( Vector< T > & rhs) noexcept;
 
-    void insert(size_t i, const T& v);
+    void insert(size_t i, const T & v);
+    Iter< T > insert(Iter< T > i, const T & v);
     void insert(size_t i, const Vector< T > & rhs, size_t start, size_t end);
+    Iter< T > insert(Iter< T > i, const Vector< T > & rhs, Iter< T > start, Iter< T > end);
     void erase(size_t i);
+    //+ erase (iter)
     void erase(size_t start, size_t end);
+    //+ erase (iter)
 
     explicit Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
     void unsafePushback(const T&);
@@ -279,6 +283,14 @@ void topit::Vector< T >::insert(size_t i, const T& v)
 }
 
 template< class T >
+topit::Iter< T > topit::Vector< T >::insert(Iter< T > i, const T & v)
+{
+  size_t index = i - begin();
+  insert(index, value);
+  return begin() + index;
+}
+
+template< class T >
 void topit::Vector< T >::insert(size_t i, const Vector< T >& rhs, size_t start, size_t end)
 {
   size_t delta = (end - start);
@@ -327,6 +339,16 @@ void topit::Vector< T >::insert(size_t i, const Vector< T >& rhs, size_t start, 
   data_ = new_data;
   capacity_ = new_cap;
   size_ += delta;
+}
+
+template< class T >
+topit::Iter< T > topit::Vector< T >::insert(Iter< T > i, const Vector< T > & rhs, Iter< T > start, Iter< T > end)
+{
+  size_t index = i - begin();
+  size_t s = start - rhs.begin();
+  size_t e = end - rhs.begin();
+  insert(index, rhs, s, e);
+  return begin() + index;
 }
 
 template< class T >
@@ -443,25 +465,25 @@ bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
 template< class T >
 topit::Iter< T > topit::Vector< T >::begin() noexcept
 {
-    return Iter<T>(data_);
+  return Iter<T>(data_);
 }
 
 template< class T >
 topit::Iter< T > topit::Vector< T >::end() noexcept
 {
-    return Iter<T>(data_ + size_);
+  return Iter<T>(data_ + size_);
 }
 
 template< class T >
 topit::Iter< const T > topit::Vector< T >::begin() const noexcept
 {
-    return Iter<const T>(data_);
+  return Iter<const T>(data_);
 }
 
 template< class T >
 topit::Iter< const T > topit::Vector< T >::end() const noexcept
 {
-    return Iter<const T>(data_ + size_);
+  return Iter<const T>(data_ + size_);
 }
 
 template< class T >

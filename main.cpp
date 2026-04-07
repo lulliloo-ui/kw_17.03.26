@@ -376,6 +376,41 @@ bool testIteratorEmpty()
   return true;
 }
 
+bool testAddElementWithIter()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(4);
+  v.pushBack(5);
+
+  auto it = v.begin();
+  ++it;
+  ++it;
+  v.insert(it, 3);
+
+  return v.getSize() == 5 &&
+    v[0] == 1 && v[1] == 2 && v[2] == 3 && v[3] == 4 && v[4] == 5;
+}
+
+bool testAddMultipleElements()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(5);
+  v.pushBack(6);
+  topit::Vector< int > src;
+  src.pushBack(2);
+  src.pushBack(3);
+  src.pushBack(4);
+
+  auto pos = v.begin();
+  ++pos;
+  v.insert(pos, src, src.begin(), src.end());
+  return v.getSize() == 6 &&  v[0] == 1 && v[1] == 2 &&
+    v[2] == 3 && v[3] == 4 && v[4] == 5 && v[5] == 6;
+}
+
 int main()
 {
   using test_t = std::pair< const char *, bool(*)() >;
@@ -411,7 +446,9 @@ int main()
     { "Non-empty vector for "
         "non-empty initializer list", testInitialaizerList},
     { "Vector traversal with denaming", testIteratorRead},
-    { "Empty iterator", testIteratorEmpty}
+    { "Empty iterator", testIteratorEmpty},
+    {"Appending to a vector using an iterator", testAddElementWithIter},
+    { "Appending a vector to a vector using an iterator", testAddMultipleElements}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;
