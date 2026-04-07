@@ -8,21 +8,24 @@
 
 namespace topit {
   template< class T >
+  struct Iter;
+
+  template< class T >
   struct Vector {
     Vector();
-    Vector(const Vector&);  //конструктор копирования
+    Vector(const Vector &);  //конструктор копирования
     Vector(Vector &&) noexcept;  //конструктор перемещения
-    Vector(size_t size, const T& init);
+    explicit Vector(size_t size, const T & init);
     ~Vector();
 
-    Vector& operator=(const Vector&);
-    Vector& operator=(Vector&&);
+    Vector& operator=(const Vector &);
+    Vector& operator=(Vector &&);
 
     bool isEmpty() const noexcept;  //дз + тест
     size_t getSize() const noexcept;  //дз + тест
     size_t getCapacity() const noexcept;  //дз + тест
 
-    void pushBack(const T& v);  //дз + тест
+    void pushBack(const T & v);  //дз + тест
     void popBack();  //дз + тест
 
     T & operator[](size_t id) noexcept;  // noexcept значит ничего внутри не проверяется
@@ -33,25 +36,47 @@ namespace topit {
     void swap( Vector< T > & rhs) noexcept;
 
     void insert(size_t i, const T& v);
-    void insert(size_t i, const Vector< T >& rhs, size_t start, size_t end);
+    void insert(size_t i, const Vector< T > & rhs, size_t start, size_t end);
     void erase(size_t i);
     void erase(size_t start, size_t end);
 
-//    explicit Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
+    explicit Vector(std::initializer_list< T > il);  //explicit - придется при вызове писать () и писать явно тип
+    void unsafePushback(const T&);
     void reserve(size_t required);
     void shrinkToFit();
-    void pushBackCount(size_t k, const T& v);
-//    template< class IT >
+    template< class IT >
+    void pushbackRange(IT b, size_t c);
+
+    Iter< T > begin() noexcept;
+    Iter< T > end() noexcept;
+    Iter< const T > begin() const noexcept;
+    Iter< const T > end() const noexcept;
 
   private:
     T * data_;
     size_t size_, capacity_;
+    void pushBackCount(size_t k, const T& v);
     explicit Vector(size_t size);
   };
 
   template< class T >
   bool operator==(const Vector< T > & lhs, const Vector< T > & rhs);
+
+
+  template< class T >
+  struct Iter {
+    explicit Iter(T * a);
+    Iter& operator++() noexcept;
+    Iter& operator--() noexcept;
+    bool operator==(const Iter< T > & a) const noexcept;
+    bool operator!=(const Iter< T > & a) const noexcept;
+    T& operator*() noexcept;
+  private:
+    friend class Vector< T >;
+    T * it;
+  };
 }
+
 
 template< class T >
 topit::Vector< T >::Vector() :
@@ -86,13 +111,6 @@ topit::Vector< T >::Vector(Vector< T > && rhs) noexcept:
   rhs.size_ = 0;
   rhs.capacity_ = 0;
 }
-
-template< class T >
-topit::Vector< T >::Vector(size_t size) :
-  data_(size ? new T[size] : nullptr),
-  size_(size),
-  capacity_(size)
-{}
 
 template< class T >
 topit::Vector< T >::Vector(size_t size, const T& init) :
@@ -165,11 +183,11 @@ void topit::Vector< T >::pushBack(const T & v)
       for (size_t i = 0; i < size_; ++i) {
         new_vec[i] = data_[i];
       }
-    new_vec[size_] = v;
-    delete [] data_;
-    data_ = new_vec;
-    size_++;
-    capacity_ = capacity_ * 2 + 1;
+      new_vec[size_] = v;
+      delete [] data_;
+      data_ = new_vec;
+      size_++;
+      capacity_ = capacity_ * 2 + 1;
     } catch (...) {
       delete [] new_vec;
       throw;
@@ -368,47 +386,51 @@ void topit::Vector< T >::erase(size_t start, size_t end)
   size_ -= delta;
 }
 
+template< class T >
+topit::Vector< T >::Vector(std::initializer_list< T > il) :
+  Vector(il.size())
+{
+  size_t i = 0;
+  for (auto it = il.begin(); it != il.end(); ++it) {
+    data_[i++] = *it;
+  }
+}
 
-// template< class T >
-// void topit::Vector< T >::changeVectorInSomeWay()
-// {
-//   Vector< T > cpy(*this);
-//   cpy.pushBack(T());
-//   cpy.pushBack(T());
-//   cpy.pushBack(T());
-//   cpy.pushBack(T());
-//   cpy.pushBack(T());
-//   cpy.pushBack(T());
-//   swap(cpy);
-// }
+template< class T>
+void topit::Vector< T >::unsafePushback(const T&)
+{
+  assert(size_ < capacity_);
+}
 
+//    void reserve(size_t required);
+//    void shrinkToFit();
 
-// template< class T >
-// topit::Vector< T >::Vector(std::initializer_list< T > il) : Vector(il.size())
-// {
-//   size_t i = 0;
-//   for (auto it = il.begin(); it = il.end(); ++it) {
-//     data_[i++] = *it;
-//   }
-// }
+template< class T >
+template< class IT >
+void topit::Vector< T >::pushbackRange(IT b, size_t c)
+{
+  //size_t c = std::distance(b, e); //плохо проход по всему списку
+  // Если памяти не хватает на с
+  // - делаем так, чтоб хватало на k*
+  // Добавляем в конец*
+}
 
-// template< class T >
-// void topit::Vector< T >::pushBackCount(size_t k, const T& val) {
-//   for (size_t i   = 0; i< k; ++i) {
+template< class T >
+void topit::Vector< T >::pushBackCount(size_t k, const T& val) {
+  for (size_t i   = 0; i< k; ++i) {
+    pushback(val);
+  }
+  //если памяти не хватает на k
+  //- делаем так, чтобы хватало k
+  // добавляем в конец*
+}
 
-//   }
-// }
-
-
-// template< class T >
-// template< class IT >
-// void topit::Vector< T >::pushBackRange(IT b, size_t c)
-// {
-//   // size_t c = std::distance(b, e); плохо проход по всему списку
-//   //
-//   //
-//   //
-// }
+template< class T >
+topit::Vector< T >::Vector(size_t size) :
+  data_(size ? new T[size] : nullptr),
+  size_(size),
+  capacity_(size)
+{}
 
 template< class T >
 bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
@@ -418,12 +440,62 @@ bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)
   return isEqual;
 }
 
+template< class T >
+topit::Iter< T > topit::Vector< T >::begin() noexcept
+{
+    return Iter<T>(data_);
+}
+
+template< class T >
+topit::Iter< T > topit::Vector< T >::end() noexcept
+{
+    return Iter<T>(data_ + size_);
+}
+
+template< class T >
+topit::Iter< const T > topit::Vector< T >::begin() const noexcept
+{
+    return Iter<const T>(data_);
+}
+
+template< class T >
+topit::Iter< const T > topit::Vector< T >::end() const noexcept
+{
+    return Iter<const T>(data_ + size_);
+}
+
+template< class T >
+topit::Iter< T >::Iter(T * a) :
+ it(a)
+{}
+
+template< class T >
+topit::Iter< T > & topit::Iter< T >::operator++() noexcept
+{
+  ++it;
+  return *this; 
+}
+
+template< class T >
+topit::Iter< T > & topit::Iter< T >::operator--() noexcept
+{
+  --it;
+  return *this; 
+}
+
+template< class T >
+bool topit::Iter< T >::operator==(const Iter& other) const noexcept { 
+  return it == other.it; 
+}
+
+template< class T >
+bool topit::Iter< T >::operator!=(const Iter& other) const noexcept { 
+  return it != other.it; 
+}
+
+template< class T >
+T& topit::Iter< T >::operator*() noexcept {
+  return *it;
+}
 
 #endif
-
-
-//робингуда и хэш таблицы на следующей паре
-
-
-//тест для копирования и перемещения
-//insert erase

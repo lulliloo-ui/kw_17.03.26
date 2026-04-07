@@ -343,10 +343,38 @@ bool testEraseMultipleElement()
   }
 }
 
-// bool testInitialaizerList() {
-//   topit::Vector< T > v = {1, 2};
-//   return v.getSize() = 2 && v[0] == 1 && v[1] == 2;
-// }
+bool testInitialaizerList() {
+  topit::Vector< int > v {1, 2};
+  return v.getSize() == 2 && v[0] == 1 && v[1] == 2;
+}
+
+bool testIteratorRead()
+{
+  topit::Vector<int> v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(3);
+  v.pushBack(4);
+  v.pushBack(5);
+  
+  int size = 1;
+  for (auto it = v.begin(); it != v.end(); ++it) {
+    if (*it != size) {
+      return false;
+    }
+    ++size;
+  }
+  return size == 6;
+}
+
+bool testIteratorEmpty()
+{
+  topit::Vector<int> v;
+  if (v.begin() != v.end()) {
+    return false;
+  }
+  return true;
+}
 
 int main()
 {
@@ -379,8 +407,11 @@ int main()
     { "Erase one element", testEraseOneElement},
     { "Erase multiple elements start more end", testEraseMultipleElementsStartMoreEnd},
     { "Erase multiple elements start equally end", testEraseMultipleElementsStartEquallyEnd},
-    { "Erase multiple element", testEraseMultipleElement}
-//    { "Non-empty vector for non-empty initializer list", testInitialaizerList}
+    { "Erase multiple element", testEraseMultipleElement},
+    { "Non-empty vector for "
+        "non-empty initializer list", testInitialaizerList},
+    { "Vector traversal with denaming", testIteratorRead},
+    { "Empty iterator", testIteratorEmpty}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;
