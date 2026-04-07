@@ -419,13 +419,59 @@ topit::Vector< T >::Vector(std::initializer_list< T > il) :
 }
 
 template< class T>
-void topit::Vector< T >::unsafePushback(const T&)
+void topit::Vector< T >::unsafePushback(const T & v)
 {
   assert(size_ < capacity_);
+  data_[size_] = v;
+  size_++;
 }
 
-//    void reserve(size_t required);
-//    void shrinkToFit();
+template< class T>
+void topit::Vector< T >::reserve(size_t required)
+{
+  if (required <= capacity_) {
+    return;
+  }
+  T* new_data = new T[required];
+  try {
+    for (size_t i = 0; i < size_; ++i) {
+      new_data[i] = data_[i];
+    }
+    delete[] data_;
+    data_ = new_data;
+    capacity_ = required;
+  } catch (...) {
+    delete[] new_data;
+    throw;
+  }
+}
+
+template< class T>
+void topit::Vector< T >::shrinkToFit()
+{
+  if (size_ == capacity_) {
+    return;
+  }
+  
+  if (size_ == 0) {
+    delete[] data_;
+    data_ = nullptr;
+    capacity_ = 0;
+    return;
+  }
+  T* new_data = new T[size_];
+  try {
+    for (size_t i = 0; i < size_; ++i) {
+      new_data[i] = data_[i];
+    }
+    delete[] data_;
+    data_ = new_data;
+    capacity_ = size_;
+  } catch (...) {
+    delete[] new_data;
+    throw;
+  }
+}
 
 template< class T >
 template< class IT >
@@ -435,16 +481,58 @@ void topit::Vector< T >::pushbackRange(IT b, size_t c)
   // Если памяти не хватает на с
   // - делаем так, чтоб хватало на k*
   // Добавляем в конец*
+  if (c == 0) {
+    return;
+  }
+  T * new_vec = new T[size_ + c];
+  try {
+    for (size_t i = 0; i < size_; ++i) {
+      new_vec[i] = data_[i];
+    }
+    for (size_t i = 0; i < c; ++i) {
+      new_vec[size_ + i] = *b;
+      ++b;
+    }
+    delete [] data_;
+    data_ = new_vec;
+    size_ += c;
+    capacity_ = size_;
+    catch (...) {
+      detete []new_vec;
+      throw;
+    }
+  }
 }
 
 template< class T >
 void topit::Vector< T >::pushBackCount(size_t k, const T& val) {
-  for (size_t i   = 0; i< k; ++i) {
-    pushback(val);
-  }
+//   for (size_t i   = 0; i< k; ++i) {
+//     pushBack(val);
+//   }
   //если памяти не хватает на k
   //- делаем так, чтобы хватало k
   // добавляем в конец*
+
+  if (k == 0) {
+    return;
+  }
+  T * new_vec = new T[size_ + k];
+  try {
+    for (size_t i = 0; i < size_; ++i) {
+      new_vec[i] = data_[i];
+    }
+    for (size_t i = 0; i < k; ++i) {
+      new_vec[size_ + i] = val;
+    }
+    delete [] data_;
+    data_ = new_vec;
+    size_ += k;
+    capacity_ = size_;
+    catch (...) {
+      detete []new_vec;
+      throw;
+    }
+  }
 }
 
 template< class T >

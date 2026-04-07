@@ -411,6 +411,37 @@ bool testAddMultipleElements()
     v[2] == 3 && v[3] == 4 && v[4] == 5 && v[5] == 6;
 }
 
+
+bool testReserveLarger()
+{
+  topit::Vector< int > v;
+  v.pushBack(1);
+  v.pushBack(2);
+  v.pushBack(3);
+  size_t before_cap = v.getCapacity();
+  v.reserve(100);
+  return v.getCapacity() == 100 && before_cap != 100 && v.getSize() == 3 &&
+    v[0] == 1 && v[1] == 2 && v[2] == 3;
+}
+
+bool testReserveEmpty()
+{
+  topit::Vector<int> v;
+  v.reserve(50);
+  return v.getCapacity() >= 50 && v.getSize() == 0;
+}
+
+bool testUnsafePushbackSingle()
+{
+  topit::Vector< int > v;
+  v.reserve(5);
+  v.unsafePushback(42);
+  
+  return v.getSize() == 1 && v[0] == 42;
+}
+
+//shrinkToFit
+
 int main()
 {
   using test_t = std::pair< const char *, bool(*)() >;
@@ -448,7 +479,10 @@ int main()
     { "Vector traversal with denaming", testIteratorRead},
     { "Empty iterator", testIteratorEmpty},
     {"Appending to a vector using an iterator", testAddElementWithIter},
-    { "Appending a vector to a vector using an iterator", testAddMultipleElements}
+    { "Appending a vector to a vector using an iterator", testAddMultipleElements},
+    { "Increased for a certain size of campasity", testReserveLarger},
+    { "Reserve empty", testReserveEmpty},
+    { "Adding without checking", testUnsafePushbackSingle}
   };
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;
