@@ -91,17 +91,24 @@ topit::Vector< T >::Vector() :
 
 template< class T >
 topit::Vector< T >::Vector(const Vector< T >& rhs) :  //строгая гарантия
-  data_(rhs.getSize() ? new T[rhs.getSize()] : nullptr),
+  data_(nullptr),
   size_(rhs.getSize()),
   capacity_(rhs.getSize())
 {
-  for (size_t i = 0; i < rhs.getSize(); ++i) {
-    try {
-      data_[i] = rhs[i];
-    } catch (...) {
-      delete []data_;
-      throw;
+  if (size_ == 0) return;
+  data_ = static_cast<T*>(::operator new(sizeof(T) * size_));
+  size_t i = 0;
+  try {
+    for (size_t j = 0; j < rhs.getSize(); ++j) {
+      new (&data_[j]) T(rhs[j]);
+      i++;
     }
+  } catch (...) {
+    for (size_t j = 0; j < i; ++j) {
+      data_[j].~T();
+    }
+    ::operator delete(data_);
+    throw;
   }
 }
 
@@ -120,15 +127,25 @@ template< class T >
 topit::Vector< T >::Vector(size_t size, const T& init) :
   Vector(size)
 {
-  for (size_t i = 0; i < size; ++i) {
-    data_[i] = init;
+  size_t i = 0;
+  try {
+    for (size_t j = 0; j < size; ++j) {
+      new (&data_[j]) T(init);
+      i++;
+    }
+  } catch (...) {
+    for (size_t j = 0; j < i; ++j) {
+      data_[j].~T();
+    }
+    ::operator delete(data_);
+    throw;
   }
 }
 
 template< class T >
 topit::Vector< T >::~Vector()
 {
-  delete [] data_;
+  ::operator delete(data_);
 }
 
 template< class T >
@@ -179,21 +196,32 @@ template< class T >
 void topit::Vector< T >::pushBack(const T & v)
 {
   if (size_ < capacity_) {
-    data_[size_] = v;
+    new (& data_[size_]) T(v);  
     size_++;
   } else {
-    T * new_vec = new T[2 * capacity_ + 1];
+    size_t new_cap = 2 * capacity_ + 1;
+    T * new_data = static_cast< T * >(::operator new(sizeof(T) * new_cap));
+    size_t i = 0;
     try {
-      for (size_t i = 0; i < size_; ++i) {
-        new_vec[i] = data_[i];
+      for (size_t j = 0; j < size_; ++j) {
+        new (& new_data[j]) T(data_[j]);
+        i++;
       }
-      new_vec[size_] = v;
-      delete [] data_;
-      data_ = new_vec;
+      new (& new_data[i]) T(v);
+      i++;
+      for (size_t j = 0; j < size_; ++j) {
+        data_[j].~T();
+      }
+      ::operator delete(data_);
+      data_ = new_data;
+      new_data = nullptr;
       size_++;
-      capacity_ = capacity_ * 2 + 1;
+      capacity_ = new_cap;
     } catch (...) {
-      delete [] new_vec;
+      for (size_t j = 0; j < i; ++j) {
+        new_data[j].~T();
+      }
+      ::operator delete(new_data);
       throw;
     }
   }
@@ -204,6 +232,8 @@ void topit::Vector< T >::popBack()
 {
   if (size_) {
     size_--;
+
+    data_[size_].~T();
   }
 }
 
@@ -225,7 +255,7 @@ T & topit::Vector< T >::at(size_t id)
 {
   const Vector< T >* cthis = this;
   //return const_cast< T& >(static_cast< const topit::Vector<T>* >(this)->at(id));
-  return const_cast< T& >(cthis -> at(id));  //избегаем дублирования с неconst at()
+  return const_cast< T & >(cthis -> at(id));  //избегаем дублирования с неconst at()
 }
 
 template< class T >
@@ -256,30 +286,40 @@ void topit::Vector< T >::insert(size_t i, const T& v)
   size_t new_cap = 0;
   if (size_ < capacity_) {
     new_cap = getCapacity();
-    new_data = new T[new_cap];
+    new_data = static_cast< T * >(::operator new(sizeof(T) * new_cap));
   } else {
     new_cap = getCapacity() * 2 + 1;
-    new_data = new T[new_cap];
+    new_data = static_cast< T * >(::operator new(sizeof(T) * new_cap));
   }
+  size_t count = 0;
   size_t j = 0;
   try {
     while (j < i) {
-      new_data[j] = data_[j];
+      new (& new_data[j]) T(data_[j]);
       j++;
+      count++;
     }
-    new_data[j++] = v;
-    while (j < getSize() + 1) {
-      new_data[j] = data_[j - 1];
-      j++;
+    new (& new_data[i]) T(v);
+    j++;
+    count++;
+    while (j < size_) {
+      new (& new_data[j + 1]) T(data_[j]);
+      count++;
     }
+    for (size_t k = 0; k < size_; ++k) {
+      data_[k].~T();
+    }
+    ::operator delete(data_);
+    data_ = new_data;
+    capacity_ = new_cap;
+    size_++;
   } catch (...) {
-    delete []new_data;
+    for (size_t k = 0; k < count; ++k) {
+      new_data[k].~T();
+    }
+    ::operator delete(new_data);
     throw;
   }
-  delete[] data_;
-  data_ = new_data;
-  capacity_ = new_cap;
-  size_++;
 }
 
 template< class T >
@@ -537,10 +577,15 @@ void topit::Vector< T >::pushBackCount(size_t k, const T& val) {
 
 template< class T >
 topit::Vector< T >::Vector(size_t size) :
-  data_(size ? new T[size] : nullptr),
+  data_(nullptr),
   size_(size),
   capacity_(size)
-{}
+{
+  if (!size) {
+    return;
+  }
+  data_ = static_cast< T* >(::operator new(sizeof(T) * size));
+}
 
 template< class T >
 bool topit::operator==(const Vector< T > & lhs, const Vector< T > & rhs)

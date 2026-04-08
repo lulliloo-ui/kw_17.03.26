@@ -484,6 +484,7 @@ int main()
     { "Reserve empty", testReserveEmpty},
     { "Adding without checking", testUnsafePushbackSingle}
   };
+
   const size_t count = sizeof(tests) / sizeof(test_t);
   std::cout << std::boolalpha;
   bool pass = true;
